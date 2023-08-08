@@ -5,7 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// 异常捕获
+// ErrCatch 异常捕获
 func ErrCatch(g *gin.Context) {
 	defer func() {
 		if err := recover(); err != nil {

@@ -8,7 +8,6 @@ import (
 func TokenAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.GetHeader("token")
-
 		if token == "" {
 			c.JSON(401, gin.H{"code": 1, "msg": "token不能为空"})
 			c.Abort()

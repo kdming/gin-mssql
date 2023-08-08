@@ -1,4 +1,4 @@
-package mssql
+package mssqlBulkCopy
 
 import (
 	"app/common/config"
@@ -11,6 +11,7 @@ import (
 	"time"
 )
 
+// BulkCopy 批量插入
 func BulkCopy(tableName string, data []interface{}) error {
 	if len(data) == 0 {
 		return nil
@@ -56,7 +57,6 @@ func BulkCopy(tableName string, data []interface{}) error {
 		columns = append(columns, "updated_at")
 		columns = append(columns, "deleted_at")
 	}
-	fmt.Println(len(columns), useGormModel, "columns len")
 
 	// 准备bulkCopy
 	txn, err := db.Begin()
@@ -67,8 +67,9 @@ func BulkCopy(tableName string, data []interface{}) error {
 	if err != nil {
 		return err
 	}
+	defer stmt.Close()
 
-	fmt.Println("插入开始", time.Now())
+	fmt.Println("bulkCopy开始：", time.Now())
 	cLen := len(columns)
 	createdAt := time.Now()
 	for i := 0; i < len(data); i++ {
@@ -87,57 +88,29 @@ func BulkCopy(tableName string, data []interface{}) error {
 		}
 		_, err = stmt.Exec(values...)
 		if err != nil {
-			fmt.Println(err.Error())
+			txn.Rollback()
 			return err
 		}
 	}
 
-	// 执行
-	result, err := stmt.Exec()
-	if err != nil {
-		fmt.Println(err.Error())
-		return err
-	}
-
-	// 关闭
-	err = stmt.Close()
-	if err != nil {
-		fmt.Println(err.Error())
-		return err
-	}
-
 	// 提交
-	err = txn.Commit()
+	if err := txn.Commit(); err != nil {
+		return err
+	}
+
+	// 获取插入条数信息
+	result, err := stmt.Exec()
 	if err != nil {
 		return err
 	}
 	rowCount, _ := result.RowsAffected()
-	fmt.Printf("%d row copied\n", rowCount)
-	fmt.Println("插入结束", time.Now())
+	fmt.Println("bulkCopy结束，插入条数:", rowCount, time.Now())
 	return nil
 }
 
+// 驼峰命名转换
 func snakeString(s string) string {
-	ssr := []byte{}
-	for i := 0; i < len(s); i++ {
-		a := s[i]
-		ii := i + 1
-		c := byte('n')
-		if ii <= len(s)-1 {
-			b := s[ii]
-			if (a >= 65 && a <= 90) && (b >= 97 && b <= 122) && b != '_' && i > 0 && ssr[i-1] != '_' {
-				c = '_'
-			} else {
-				c = 'n'
-			}
-			if c != 'n' {
-				ssr = append(ssr, []byte{c, a}...)
-			} else {
-				ssr = append(ssr, a)
-			}
-		} else {
-			ssr = append(ssr, a)
-		}
-	}
-	return strings.ToLower(string(ssr))
+	re := regexp.MustCompile("([a-z0-9])([A-Z])")
+	snakeCase := re.ReplaceAllString(s, "${1}_${2}")
+	return strings.ToLower(snakeCase)
 }

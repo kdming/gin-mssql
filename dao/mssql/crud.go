@@ -4,40 +4,67 @@ import (
 	"gorm.io/gorm"
 )
 
-func Insert(table string, data interface{}) error {
-	return db.Table(table).Create(data).Error
+type crudService struct {
+	db *gorm.DB
 }
 
-func FindOne(table, sql string, params []interface{}, out interface{}) error {
-	err := db.Table(table).Where(sql, params...).First(out).Error
+// NewCrud new crudSvc
+func NewCrud(taxModel bool) *crudService {
+	if taxModel {
+		return &crudService{
+			db: db,
+		}
+	}
+	return &crudService{db: db.Begin()}
+}
+
+// Insert 插入数据
+func (s *crudService) Insert(model, data interface{}) error {
+	return s.db.Model(model).Create(data).Error
+}
+
+// FindOne 查询单条数据
+func (s *crudService) FindOne(model interface{}, sql string, params []interface{}, out interface{}) error {
+	err := s.db.Model(model).Where(sql, params...).First(out).Error
 	if err == gorm.ErrRecordNotFound {
 		err = nil
 	}
 	return err
 }
 
-func Find(table, sql string, params []interface{}, out interface{}) error {
-	return db.Table(table).Where(sql, params...).Find(out).Error
+// Find 查询数据
+func (s *crudService) Find(model interface{}, sql string, params []interface{}, out interface{}) error {
+	return s.db.Model(model).Where(sql, params...).Find(out).Error
 }
 
-func Count(table, sql string, params []interface{}) (int, error) {
+// Count 统计数据条数
+func (s *crudService) Count(model interface{}, sql string, params []interface{}) (int, error) {
 	var total int64
-	err := db.Table(table).Where(sql, params...).Count(&total).Error
+	err := s.db.Model(model).Where(sql, params...).Count(&total).Error
 	return int(total), err
 }
 
-func Update(table, sql string, params []interface{}, update interface{}) error {
-	return db.Table(table).Where(sql, params...).Updates(update).Error
+// Update 更新数据
+func (s *crudService) Update(model interface{}, sql string, params []interface{}, update interface{}) error {
+	return s.db.Model(model).Where(sql, params...).Updates(update).Error
 }
 
-func Delete(model interface{}, sql string, params []interface{}) error {
-	return db.Where(sql, params...).Unscoped().Delete(model).Error
+// Delete 删除数据（非软删除）
+func (s *crudService) Delete(model interface{}, sql string, params []interface{}) error {
+	return s.db.Where(sql, params...).Unscoped().Delete(model).Error
 }
 
-func Exec(table, sql string, params []interface{}, out interface{}) error {
-	return db.Table(table).Raw(sql, params...).Scan(out).Error
+// ExecNTable 执行原生sql语句
+func (s *crudService) ExecNTable(sql string, params []interface{}, out interface{}) error {
+	return s.db.Raw(sql, params...).Scan(out).Error
 }
 
-func ExecNTable(sql string, params []interface{}, out interface{}) error {
-	return db.Raw(sql, params...).Scan(out).Error
+// RollBack 事物回滚
+func (s *crudService) RollBack() error {
+	return s.db.Rollback().Error
+}
+
+// Commit 事物提交
+func (s *crudService) Commit() error {
+	return s.db.Commit().Error
 }

@@ -1,8 +1,8 @@
 package api
 
 import (
-	v1 "app/api/v1"
-	"app/common/middleware"
+	"app/api/user_api"
+	"app/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -12,7 +12,7 @@ func InitRouter(g *gin.Engine) {
 	g.Use(middleware.ErrCatch)
 
 	api := g.Group("/api/")
-	api.POST("login", v1.Login)
+	api.POST("login", user_api.Login)
 	api.Use(middleware.TokenAuth())
-	api.POST("register", v1.Register)
+	api.POST("register", user_api.Register)
 }
