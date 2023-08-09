@@ -68,3 +68,7 @@ func (s *crudService) RollBack() error {
 func (s *crudService) Commit() error {
 	return s.db.Commit().Error
 }
+
+func (s *crudService) GetDB() *gorm.DB {
+	return s.db
+}

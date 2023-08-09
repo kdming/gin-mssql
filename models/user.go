@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// User 用户信息
 type User struct {
 	gorm.Model
 	Name     string    `gorm:"column:name"`

@@ -11,6 +11,7 @@ import (
 type JwtSvc struct {
 }
 
+// MakeToken 生成token
 func (*JwtSvc) MakeToken(user *models.User) (string, error) {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
@@ -24,6 +25,7 @@ func (*JwtSvc) MakeToken(user *models.User) (string, error) {
 	return tk, nil
 }
 
+// ParseToken 解析token
 func (*JwtSvc) ParseToken(token string) (*models.User, error) {
 	tk, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		return []byte(config.GetConfig().JwtKey), nil
