@@ -69,6 +69,7 @@ func (s *crudService) Commit() error {
 	return s.db.Commit().Error
 }
 
+// GetDB 获取db对象
 func (s *crudService) GetDB() *gorm.DB {
 	return s.db
 }

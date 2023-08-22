@@ -9,10 +9,12 @@ import (
 type UserSvc struct {
 }
 
+// Login 用户登录
 func (*UserSvc) Login(user *models.User) error {
 	return mssql.NewCrud(false).FindOne(&models.User{}, "name = ? and password = ?", app.I{user.Name, user.Password}, user)
 }
 
+// Register 用户注册
 func (*UserSvc) Register(user *models.User) error {
 	crud := mssql.NewCrud(false)
 	if err := crud.FindOne("users", "name = ? and password = ?", app.I{user.Name, user.Password}, user); err != nil {
