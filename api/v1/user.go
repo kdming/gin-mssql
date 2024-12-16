@@ -1,4 +1,4 @@
-package user_api
+package v1
 
 import (
 	"app/common/app"
