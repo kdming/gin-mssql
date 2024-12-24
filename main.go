@@ -4,6 +4,7 @@ import (
 	"app/api"
 	"app/common/config"
 	"app/dao/mssql"
+	"fmt"
 	"github.com/gin-gonic/gin"
 )
 
@@ -15,7 +16,7 @@ func main() {
 	if appPort == "" {
 		appPort = ":8080"
 	}
-	if err := g.Run(config.GetConfig().AppPort); err != nil {
+	if err := g.Run(fmt.Sprintf(":%v", appPort)); err != nil {
 		panic(err)
 	}
 }
