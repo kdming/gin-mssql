@@ -15,12 +15,16 @@ func Login(c *gin.Context) {
 		app.Err("参数绑定失败", err)
 	}
 
+	if user.Name == "" || user.Password == "" {
+		app.Err("用户名密码不能为空")
+	}
+
 	userSvc := &user_service.UserSvc{}
 	if err := userSvc.Login(user); err != nil {
 		app.Err("登录失败", err)
 	}
 	if user.ID == 0 {
-		app.Err("用户不存在", nil)
+		app.Err("用户不存在")
 	}
 
 	token, err := (&jwt_service.JwtSvc{}).MakeToken(user)
@@ -36,8 +40,9 @@ func Register(c *gin.Context) {
 	if err := c.ShouldBind(user); err != nil {
 		app.Err("参数绑定失败", err)
 	}
+
 	if user.Name == "" || user.Password == "" {
-		app.Err("请输入完整的账号与密码", nil)
+		app.Err("用户名密码不能为空")
 	}
 
 	if err := (&user_service.UserSvc{}).Register(user); err != nil {
