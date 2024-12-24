@@ -1,23 +1,26 @@
 package app
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 )
 
 // Err web服务抛出异常
-func Err(params ...interface{}) {
+func Err(errors ...interface{}) {
 	errStr := ""
-	for i := 0; i < len(params); i++ {
-		p := params[i]
-		switch p.(type) {
+	for i := 0; i < len(errors); i++ {
+		switch e := errors[i].(type) {
+		case nil:
+
 		case string:
-			errStr += p.(string)
+			errStr += e
 		case error:
 			if errStr != "" {
 				errStr += ":"
 			}
-			errStr += p.(error).Error()
+			errStr += e.Error()
 		default:
+			fmt.Println(e)
 			errStr += "发生错误，无法判断错误类型"
 		}
 	}
