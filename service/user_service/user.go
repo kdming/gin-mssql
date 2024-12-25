@@ -17,11 +17,11 @@ func (*UserSvc) Login(user *models.User) error {
 // Register 用户注册
 func (*UserSvc) Register(user *models.User) error {
 	crud := mssql.NewCrud(false)
-	if err := crud.FindOne("users", "name = ? and password = ?", app.I{user.Name, user.Password}, user); err != nil {
+	if err := crud.FindOne(&models.User{}, "name = ? and password = ?", app.I{user.Name, user.Password}, user); err != nil {
 		return err
 	}
 	if user.ID != 0 {
 		return app.NewError("用户已注册！", nil)
 	}
-	return crud.Insert("users", user)
+	return crud.Insert(&models.User{}, user)
 }
